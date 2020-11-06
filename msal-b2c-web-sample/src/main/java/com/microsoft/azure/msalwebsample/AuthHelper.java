@@ -20,6 +20,9 @@ import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import lombok.Getter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +32,8 @@ class AuthHelper {
 
     static final String PRINCIPAL_SESSION_NAME = "principal";
     static final String TOKEN_CACHE_SESSION_ATTRIBUTE = "token_cache";
+
+    Logger logger = LoggerFactory.getLogger("Authhelper");
 
     @Autowired
     BasicConfiguration configuration;

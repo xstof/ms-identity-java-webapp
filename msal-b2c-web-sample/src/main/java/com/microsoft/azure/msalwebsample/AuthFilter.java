@@ -31,6 +31,8 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +44,8 @@ public class AuthFilter implements Filter {
 
     private List<String> excludedUrls = Arrays.asList("/", "/msal4jsample/");
 
+    Logger logger = LoggerFactory.getLogger("Authfilter");
+
     @Autowired
     AuthHelper authHelper;
 
@@ -49,6 +53,7 @@ public class AuthFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain) throws IOException, ServletException {
         if (request instanceof HttpServletRequest) {
+            logger.info("entered auth middleware");
             HttpServletRequest httpRequest = (HttpServletRequest) request;
             HttpServletResponse httpResponse = (HttpServletResponse) response;
             try {
@@ -59,18 +64,23 @@ public class AuthFilter implements Filter {
 
                 // exclude home page
                 if(excludedUrls.contains(path)){
+                    logger.info("auth middleware: url is excluded");
                     chain.doFilter(request, response);
                     return;
                 }
                 // check if user has a AuthData in the session
                 if (!AuthHelper.isAuthenticated(httpRequest)) {
+                    logger.info("auth middleware: http request is not authenticated");
                     if(AuthHelper.containsAuthenticationCode(httpRequest)){
+                        logger.info("auth middleware: found authcode");
                         // response should have authentication code, which will be used to acquire access token
                         processAuthenticationCodeRedirect(httpRequest, currentUri, fullUrl);
 
                         CookieHelper.removeStateNonceCookies(httpResponse);
                     } else {
                         // not authenticated, redirecting to login.microsoft.com so user can authenticate
+                        logger.info("auth middleware: redirecting towards Sign-Up Sign-In B2C policy");
+                        logger.info("auth middleware: authHelper.configuration.signUpSignInAuthority is {}", authHelper.configuration.signUpSignInAuthority);
                         sendAuthRedirect(authHelper.configuration.signUpSignInAuthority, httpRequest, httpResponse);
                         return;
                     }
@@ -124,6 +134,7 @@ public class AuthFilter implements Filter {
             // validate nonce to prevent reply attacks (code maybe substituted to one with broader access)
             validateNonce(CookieHelper.getCookie(httpRequest, CookieHelper.MSAL_WEB_APP_NONCE_COOKIE),
                     getNonceClaimValueFromIdToken(result.idToken()));
+            logger.info("auth middleware: nonce validated");
 
             authHelper.setSessionPrincipal(httpRequest, result);
         } else {
@@ -139,10 +150,14 @@ public class AuthFilter implements Filter {
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
+        logger.info("auth middleware: set state nonce cookie");
         CookieHelper.setStateNonceCookies(httpRequest, httpResponse, state, nonce);
 
+        logger.info("auth middleware: set 302 response status");
         httpResponse.setStatus(302);
+        
         String redirectUrl = getRedirectUrl(authoriy, httpRequest.getParameter("claims"), state, nonce);
+        logger.info("auth middleware: redirecting to {}", redirectUrl);
         httpResponse.sendRedirect(redirectUrl);
     }
 
@@ -172,6 +187,7 @@ public class AuthFilter implements Filter {
     private String getRedirectUrl(String authority, String claims, String state, String nonce)
             throws UnsupportedEncodingException {
 
+        logger.info("auth middleware: getting redirect url for authority: {}", authority);
         String redirectUrl = authority.replace("/tfp", "") + "oauth2/v2.0/authorize?" +
                 "response_type=code&" +
                 "response_mode=query&" +

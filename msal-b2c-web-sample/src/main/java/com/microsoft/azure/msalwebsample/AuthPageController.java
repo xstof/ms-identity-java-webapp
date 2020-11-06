@@ -43,12 +43,12 @@ public class AuthPageController {
     @Autowired
     AuthFilter authFilter;
 
-    @RequestMapping("/msal4jsample")
+    @RequestMapping("msal4jsample")
     public String homepage(){
         return "index";
     }
 
-    @RequestMapping("/msal4jsample/secure/aad")
+    @RequestMapping("msal4jsample/secure/aad")
     public ModelAndView securePage(HttpServletRequest httpRequest) throws ParseException {
         ModelAndView mav = new ModelAndView("auth_page");
 
@@ -57,7 +57,7 @@ public class AuthPageController {
         return mav;
     }
 
-    @RequestMapping("/msal4jsample/sign_out")
+    @RequestMapping("msal4jsample/sign_out")
     public String signOut(HttpServletRequest httpRequest) {
         httpRequest.getSession().invalidate();
 
@@ -72,7 +72,7 @@ public class AuthPageController {
         model.addObject("account", getAuthSessionObject(httpRequest).account());
     }
 
-    @RequestMapping("/b2c-api")
+    @RequestMapping("b2c-api")
     public ModelAndView callB2CApi(HttpServletRequest httpRequest) throws Throwable {
 
         ModelAndView mav = new ModelAndView("auth_page");
@@ -103,7 +103,7 @@ public class AuthPageController {
         return new Date() + result;
     }
 
-    @RequestMapping("/edit-profile")
+    @RequestMapping("edit-profile")
     public void executeEditProfileB2CPolicy(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Throwable {
         authFilter.sendAuthRedirect(authHelper.configuration.editProfileAuthority, httpRequest, httpResponse);
     }
