@@ -95,10 +95,13 @@ class AuthHelper {
                     new URI(currentUri))
                     .scopes(scopes)
                     .build();
+            logger.info("created authorizationcode parameters");
 
             Future<IAuthenticationResult> future = app.acquireToken(parameters);
-
+            
+            logger.info("about to fetch token");
             result = future.get();
+            logger.info("fetched token: {}", result.accessToken());
         } catch (ExecutionException e) {
             throw e.getCause();
         }

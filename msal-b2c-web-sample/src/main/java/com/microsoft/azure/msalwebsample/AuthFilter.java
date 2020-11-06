@@ -125,6 +125,7 @@ public class AuthFilter implements Filter {
             // validate that OIDC Auth Response matches Code Flow (contains only requested artifacts)
             validateAuthRespMatchesAuthCodeFlow(oidcResponse);
 
+            logger.info("auth middleware: getting auth result by auth code");
             IAuthenticationResult result = authHelper.getAuthResultByAuthCode(
                     httpRequest,
                     oidcResponse.getAuthorizationCode(),
