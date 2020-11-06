@@ -1,5 +1,6 @@
 HELP.md
-/target/
+*/target/
+keystore.p12
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
