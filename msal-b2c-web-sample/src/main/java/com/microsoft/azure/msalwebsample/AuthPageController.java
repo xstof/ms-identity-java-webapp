@@ -19,6 +19,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpEntity;
@@ -36,6 +38,8 @@ import static com.microsoft.azure.msalwebsample.AuthHelper.getAuthSessionObject;
 
 @Controller
 public class AuthPageController {
+
+    Logger logger = LoggerFactory.getLogger(AuthPageController.class);
 
     @Autowired
     AuthHelper authHelper;
@@ -105,6 +109,7 @@ public class AuthPageController {
 
     @RequestMapping("edit-profile")
     public void executeEditProfileB2CPolicy(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Throwable {
+        logger.info("about to redirect for profile edit with authority: {}", authHelper.configuration.editProfileAuthority);
         authFilter.sendAuthRedirect(authHelper.configuration.editProfileAuthority, httpRequest, httpResponse);
     }
 }
